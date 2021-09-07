@@ -1,0 +1,9 @@
+{% extends 'app/layout.html' %}
+
+{% block title %} Edit survey {% endblock %}
+
+{% block content %}
+    <div id="app">
+        <survey-builder v-bind:edit="1" surveyid="{{id}}"></survey-builder>
+    </div>
+{% endblock %}

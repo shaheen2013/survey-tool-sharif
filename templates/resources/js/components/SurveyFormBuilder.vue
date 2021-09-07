@@ -1,9 +1,11 @@
 <template>
   <div class="container">
     <div class="row">
+      <div v-if="this.error_msg['title']" class="alert alert-danger text-center text-white" role="alert"> <h6>Survey title must be required</h6></div>
+      <div v-if="this.is_save" class="alert alert-success text-center text-white" role="alert"> <h6>{{this.error_msg.message}}</h6></div>
+      <div v-if="this.is_error" class="alert alert-danger text-center text-white" role="alert"> <h6>At list one question required</h6></div>
     <div class="col-4">
       <h3>Available list</h3>
-      <div v-if="is_error" class="alert alert-danger" role="alert"> {{this.error_msg}}</div>
       <draggable
         class="dragArea list-group"
         :list="list1"
@@ -33,7 +35,10 @@
                    Add question No {{ index+1 }}
                   <span @click="removeQue(index)" class="btn btn-danger">X</span>
                 </div>
-                <input v-model="element.title" class="form-control" type="element.type">
+                <input v-model="element.title" class="form-control" type="text">
+<!--                <div v-if="index in error_list" class="alert alert-danger text-center text-white" role="alert">-->
+<!--                  This field is required-->
+<!--                </div>-->
                 <div v-if ="element.type === 'radio'">
                   Options
                   <textarea v-model="element.options" class="form-control"></textarea>
@@ -58,13 +63,14 @@
 </template>
 
 <script>
-import draggable from "vuedraggable";
+import draggable from "vuedraggable"
 import axios from 'axios'
 let idGlobal = 1;
 export default {
   name: "SurveyFormBuilder",
   display: "Custom Clone",
   order: 3,
+  props:['edit','surveyid'],
   components: {
     draggable
   },
@@ -74,37 +80,77 @@ export default {
       list2: [],
       survey_title:"",
       is_error: false,
-      error_msg:""
+      error_msg:{},
+      is_save: false,
+      error_list:[],
+      survey_item:{}
     };
   },
   methods: {
     submit_btn(){
       let url = '/survey-save/'
       this.list2.push({"survey_title":this.survey_title})
-      axios.post(url,this.list2).then(
+      if(this.edit === 0){
+        axios.post(url,this.list2).then(
           res=>{
-            console.log(res.data)
-            if(res.data == "save"){
+            this.error_msg=""
+            this.error_list = []
+            if(res.data['info']==='save'){
               this.survey_title = ""
               this.list2 = []
               this.is_error = false
-              this.error_msg = ""
-            }{
-              this.is_error = true
+              this.is_save = true
               this.error_msg = res.data
-              this.list2.pop()
             }
-
+            else{
+                this.is_save = false
+                this.error_msg = res.data
+                if(this.error_msg['questions'][0]==='This list may not be empty.')
+                  this.is_error = true
+                else{
+                  this.is_error = false
+                  console.log(this.error_msg['questions'][0]['title'])
+                }
+            }
+            this.list2.pop()
           }
       ).catch(error=>{
             console.log(error)
-
       })
+      }else{
+        this.list2.push({"survey_id":this.surveyid})
+        axios.put(url,this.list2).then(
+            res=>{
+              this.list2.pop()
+              this.error_msg=""
+              this.error_list = []
+              if(res.data['info']==='update'){
+                this.survey_title = ""
+                this.list2 = []
+                this.is_error = false
+                this.is_save = true
+                this.error_msg = res.data
+              }
+              else{
+                  this.is_save = false
+                  this.error_msg = res.data
+                  if(this.error_msg['questions'][0]==='This list may not be empty.')
+                    this.is_error = true
+                  else{
+                    this.is_error = false
+                    console.log(this.error_msg['questions'][0]['title'])
+                  }
+              }
+              this.list2.pop()
+            }
+        ).catch(
+            err=>console.log(err)
+        )
+      }
     },
     log: function(evt) {
       if(evt.added)
         ++idGlobal
-      console.log(this.list2)
     },
     cloneDog({ id }) {
       return {
@@ -119,12 +165,34 @@ export default {
     }
   },
   mounted() {
-    let url = '/question-type'
-    axios.get(url)
-        .then(res=>{
-            this.list1 = res.data
+    if(this.edit===0)
+    {
+      let url = '/question-type'
+      axios.get(url)
+          .then(res=>{
+              this.list1 = res.data
+            }
+          ).catch(err=>console.log(err))
+    }else{
+      let url = '/question-type'
+      axios.get(url)
+          .then(res=>{
+              this.list1 = res.data
+            }
+          ).catch(err=>console.log(err))
+      url = '/update-survey/'+this.surveyid
+      axios.get(url)
+      .then(
+          res=>{
+            this.list2 = res.data
+            this.survey_item = this.list2.pop()
+            this.survey_title = this.survey_item['title']
           }
-        ).catch(err=>console.log(err))
+      )
+      .catch(
+          err=>console.log("error",err)
+      )
+    }
   }
 };
 </script>

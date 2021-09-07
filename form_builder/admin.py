@@ -4,7 +4,7 @@ from django.contrib import admin
 from .models import QuestionType,Survey,Question
 
 admin.site.register(QuestionType)
-
+admin.site.register(Question)
 
 class QuestionInLineModel(admin.StackedInline):
     model = Question

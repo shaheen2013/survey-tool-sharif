@@ -1971,6 +1971,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 
 
 var idGlobal = 1;
@@ -1978,6 +1983,7 @@ var idGlobal = 1;
   name: "SurveyFormBuilder",
   display: "Custom Clone",
   order: 3,
+  props: ['edit', 'surveyid'],
   components: {
     draggable: vuedraggable__WEBPACK_IMPORTED_MODULE_0___default.a
   },
@@ -1987,7 +1993,10 @@ var idGlobal = 1;
       list2: [],
       survey_title: "",
       is_error: false,
-      error_msg: ""
+      error_msg: {},
+      is_save: false,
+      error_list: [],
+      survey_item: {}
     };
   },
   methods: {
@@ -1998,29 +2007,64 @@ var idGlobal = 1;
       this.list2.push({
         "survey_title": this.survey_title
       });
-      axios__WEBPACK_IMPORTED_MODULE_1___default.a.post(url, this.list2).then(function (res) {
-        console.log(res.data);
 
-        if (res.data == "save") {
-          _this.survey_title = "";
-          _this.list2 = [];
-          _this.is_error = false;
+      if (this.edit === 0) {
+        axios__WEBPACK_IMPORTED_MODULE_1___default.a.post(url, this.list2).then(function (res) {
           _this.error_msg = "";
-        }
+          _this.error_list = [];
 
-        {
-          _this.is_error = true;
-          _this.error_msg = res.data;
+          if (res.data['info'] === 'save') {
+            _this.survey_title = "";
+            _this.list2 = [];
+            _this.is_error = false;
+            _this.is_save = true;
+            _this.error_msg = res.data;
+          } else {
+            _this.is_save = false;
+            _this.error_msg = res.data;
+            if (_this.error_msg['questions'][0] === 'This list may not be empty.') _this.is_error = true;else {
+              _this.is_error = false;
+              console.log(_this.error_msg['questions'][0]['title']);
+            }
+          }
 
           _this.list2.pop();
-        }
-      })["catch"](function (error) {
-        console.log(error);
-      });
+        })["catch"](function (error) {
+          console.log(error);
+        });
+      } else {
+        this.list2.push({
+          "survey_id": this.surveyid
+        });
+        axios__WEBPACK_IMPORTED_MODULE_1___default.a.put(url, this.list2).then(function (res) {
+          _this.list2.pop();
+
+          _this.error_msg = "";
+          _this.error_list = [];
+
+          if (res.data['info'] === 'update') {
+            _this.survey_title = "";
+            _this.list2 = [];
+            _this.is_error = false;
+            _this.is_save = true;
+            _this.error_msg = res.data;
+          } else {
+            _this.is_save = false;
+            _this.error_msg = res.data;
+            if (_this.error_msg['questions'][0] === 'This list may not be empty.') _this.is_error = true;else {
+              _this.is_error = false;
+              console.log(_this.error_msg['questions'][0]['title']);
+            }
+          }
+
+          _this.list2.pop();
+        })["catch"](function (err) {
+          return console.log(err);
+        });
+      }
     },
     log: function log(evt) {
       if (evt.added) ++idGlobal;
-      console.log(this.list2);
     },
     cloneDog: function cloneDog(_ref) {
       var id = _ref.id;
@@ -2038,12 +2082,29 @@ var idGlobal = 1;
   mounted: function mounted() {
     var _this2 = this;
 
-    var url = '/question-type';
-    axios__WEBPACK_IMPORTED_MODULE_1___default.a.get(url).then(function (res) {
-      _this2.list1 = res.data;
-    })["catch"](function (err) {
-      return console.log(err);
-    });
+    if (this.edit === 0) {
+      var url = '/question-type';
+      axios__WEBPACK_IMPORTED_MODULE_1___default.a.get(url).then(function (res) {
+        _this2.list1 = res.data;
+      })["catch"](function (err) {
+        return console.log(err);
+      });
+    } else {
+      var _url = '/question-type';
+      axios__WEBPACK_IMPORTED_MODULE_1___default.a.get(_url).then(function (res) {
+        _this2.list1 = res.data;
+      })["catch"](function (err) {
+        return console.log(err);
+      });
+      _url = '/update-survey/' + this.surveyid;
+      axios__WEBPACK_IMPORTED_MODULE_1___default.a.get(_url).then(function (res) {
+        _this2.list2 = res.data;
+        _this2.survey_item = _this2.list2.pop();
+        _this2.survey_title = _this2.survey_item['title'];
+      })["catch"](function (err) {
+        return console.log("error", err);
+      });
+    }
   }
 });
 
@@ -6249,19 +6310,44 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "container" }, [
     _c("div", { staticClass: "row" }, [
+      this.error_msg["title"]
+        ? _c(
+            "div",
+            {
+              staticClass: "alert alert-danger text-center text-white",
+              attrs: { role: "alert" }
+            },
+            [_c("h6", [_vm._v("Survey title must be required")])]
+          )
+        : _vm._e(),
+      _vm._v(" "),
+      this.is_save
+        ? _c(
+            "div",
+            {
+              staticClass: "alert alert-success text-center text-white",
+              attrs: { role: "alert" }
+            },
+            [_c("h6", [_vm._v(_vm._s(this.error_msg.message))])]
+          )
+        : _vm._e(),
+      _vm._v(" "),
+      this.is_error
+        ? _c(
+            "div",
+            {
+              staticClass: "alert alert-danger text-center text-white",
+              attrs: { role: "alert" }
+            },
+            [_c("h6", [_vm._v("At list one question required")])]
+          )
+        : _vm._e(),
+      _vm._v(" "),
       _c(
         "div",
         { staticClass: "col-4" },
         [
           _c("h3", [_vm._v("Available list")]),
-          _vm._v(" "),
-          _vm.is_error
-            ? _c(
-                "div",
-                { staticClass: "alert alert-danger", attrs: { role: "alert" } },
-                [_vm._v(" " + _vm._s(this.error_msg))]
-              )
-            : _vm._e(),
           _vm._v(" "),
           _c(
             "draggable",
@@ -6278,7 +6364,7 @@ var render = function() {
               return _c(
                 "div",
                 { key: element.id, staticClass: "list-group-item" },
-                [_vm._v("\n        " + _vm._s(element.title) + "\n      ")]
+                [_vm._v("\n          " + _vm._s(element.title) + "\n        ")]
               )
             }),
             0
@@ -6343,9 +6429,9 @@ var render = function() {
                       { staticClass: "d-flex justify-content-between mb-2" },
                       [
                         _vm._v(
-                          "\n                 Add question No " +
+                          "\n                   Add question No " +
                             _vm._s(index + 1) +
-                            "\n                "
+                            "\n                  "
                         ),
                         _c(
                           "span",
@@ -6372,7 +6458,7 @@ var render = function() {
                         }
                       ],
                       staticClass: "form-control",
-                      attrs: { type: "element.type" },
+                      attrs: { type: "text" },
                       domProps: { value: element.title },
                       on: {
                         input: function($event) {
@@ -6386,7 +6472,9 @@ var render = function() {
                     _vm._v(" "),
                     element.type === "radio"
                       ? _c("div", [
-                          _vm._v("\n                Options\n                "),
+                          _vm._v(
+                            "\n                  Options\n                  "
+                          ),
                           _c("textarea", {
                             directives: [
                               {

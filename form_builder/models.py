@@ -21,14 +21,14 @@ class QuestionType(models.Model):
     options = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return self.title
+        return self.title or ""
 
 
 class Survey(models.Model):
     title = models.CharField(max_length=150,blank=True,null=True)
 
     def __str__(self):
-        return self.title
+        return self.title or ""
 
 
 class Question(models.Model):
@@ -39,7 +39,7 @@ class Question(models.Model):
     choices = models.JSONField(null=True, blank=True)
 
     def __str__(self):
-        return self.title
+        return self.title or ""
 
     def save(self, *args, **kwargs):
         choices = self.options.split(',')
