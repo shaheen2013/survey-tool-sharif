@@ -1,13 +1,13 @@
 import serializers as serializers
 from rest_framework.serializers import ModelSerializer, ValidationError
-from .models import QuestionType,Survey,Question
+from .models import QuestionType, Survey, Question
 from rest_framework import serializers
 
 
 class QuestionTypeSerializer(ModelSerializer):
     class Meta:
         model = QuestionType
-        fields = ['id','title','type','options']
+        fields = ['id', 'title', 'type', 'options']
 
 
 # class QuestionSerializer(ModelSerializer):
@@ -16,20 +16,19 @@ class QuestionTypeSerializer(ModelSerializer):
 #         fields = ['title','type','options']
 
 
-    # def validate(self, data):
-    #     # if len(data) == 0:
-    #     #     raise ValidationError("At least one question required")
-    #     index = 1
-    #     for question in data:
-    #         print(question[2])
-    #         # if question[0] == '':
-    #         #     raise ValidationError("Question {}'s title must be required".format(index))
-    #         if question[1] == 'checkbox' or question[1] == 'select' or question[1] == 'radio':
-    #             if question[2] == '':
-    #                 raise ValidationError("Options of question {} must be required".format(index))
-    #         index += 1
-    #     return data
-
+# def validate(self, data):
+#     # if len(data) == 0:
+#     #     raise ValidationError("At least one question required")
+#     index = 1
+#     for question in data:
+#         print(question[2])
+#         # if question[0] == '':
+#         #     raise ValidationError("Question {}'s title must be required".format(index))
+#         if question[1] == 'checkbox' or question[1] == 'select' or question[1] == 'radio':
+#             if question[2] == '':
+#                 raise ValidationError("Options of question {} must be required".format(index))
+#         index += 1
+#     return data
 
 
 # class SurveySerializer(ModelSerializer):
@@ -65,6 +64,7 @@ class QuestionTypeSerializer(ModelSerializer):
 
 
 class QuestionSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
     title = serializers.CharField(max_length=100, required=True)
     type = serializers.CharField(required=True)
     options = serializers.CharField(required=False, allow_blank=True)
@@ -77,7 +77,6 @@ class QuestionSerializer(serializers.Serializer):
 
 
 class SurveySerializer(serializers.Serializer):
-
     title = serializers.CharField(required=True)
     questions = serializers.ListField(
         child=(QuestionSerializer()),
@@ -87,13 +86,32 @@ class SurveySerializer(serializers.Serializer):
     def create(self, validated_data):
         questions_data = validated_data.pop('questions')
         survey = Survey.objects.create(**validated_data)
+        i = 1
         for question in questions_data:
-            Question.objects.create(survey=survey, **question)
+            Question.objects.create(survey=survey, title=question['title'], type=question['type'],
+                                    options=question['options'], ordering=i)
+            i += 1
         return survey
 
-    def update(self,survey_id, validated_data):
-        print("updated ",validated_data)
+    def update(self, survey_id, validated_data):
+        questions_data = validated_data.pop('questions')
+        print(questions_data)
         survey = Survey.objects.get(id=survey_id)
-        survey.delete()
-        self.create(validated_data)
-
+        i = 1
+        for question in questions_data:
+            if question['id'] == 0:
+                Question.objects.create(survey=survey, title=question['title'], type=question['type'],
+                                        options=question['options'], ordering=i)
+            else:
+                Question.objects.update_or_create(
+                    id=question['id'],
+                    defaults={
+                        'survey': survey,
+                        'title': question['title'],
+                        'type': question['type'],
+                        'options': question['options'],
+                        'ordering': i
+                    }
+                )
+            i += 1
+        return survey

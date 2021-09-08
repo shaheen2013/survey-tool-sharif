@@ -37,6 +37,7 @@ class Question(models.Model):
     type = models.CharField(max_length=100,blank=True,null=True)
     options = models.CharField(max_length=100,blank=True,null=True)
     choices = models.JSONField(null=True, blank=True)
+    ordering = models.PositiveIntegerField(null=True,blank=True)
 
     def __str__(self):
         return self.title or ""
