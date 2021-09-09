@@ -2040,7 +2040,6 @@ var idGlobal = 1;
     cloneDog: function cloneDog(_ref) {
       var id = _ref.id;
       return {
-        id: 0,
         type: "".concat(this.list1[id - 1].type),
         title: "",
         options: ""
@@ -9487,7 +9486,7 @@ var render = function() {
               _vm._l(_vm.list2, function(element, index) {
                 return _c(
                   "div",
-                  { key: element.id, staticClass: "list-group-item border-2" },
+                  { key: index, staticClass: "list-group-item border-2" },
                   [
                     _c(
                       "div",

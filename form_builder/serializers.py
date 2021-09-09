@@ -1,4 +1,3 @@
-import serializers as serializers
 from rest_framework.serializers import ModelSerializer, ValidationError
 from .models import QuestionType, Survey, Question
 from rest_framework import serializers
@@ -10,61 +9,8 @@ class QuestionTypeSerializer(ModelSerializer):
         fields = ['id', 'title', 'type', 'options']
 
 
-# class QuestionSerializer(ModelSerializer):
-#     class Meta:
-#         model = Question
-#         fields = ['title','type','options']
-
-
-# def validate(self, data):
-#     # if len(data) == 0:
-#     #     raise ValidationError("At least one question required")
-#     index = 1
-#     for question in data:
-#         print(question[2])
-#         # if question[0] == '':
-#         #     raise ValidationError("Question {}'s title must be required".format(index))
-#         if question[1] == 'checkbox' or question[1] == 'select' or question[1] == 'radio':
-#             if question[2] == '':
-#                 raise ValidationError("Options of question {} must be required".format(index))
-#         index += 1
-#     return data
-
-
-# class SurveySerializer(ModelSerializer):
-#     questions = QuestionSerializer(many=True)
-#
-#     class Meta:
-#         model = Survey
-#         fields = ['title','questions']
-#
-#     def validate(self, data):
-#         print("type of data, ",type(data))
-#         if data.get('title') == "":
-#             raise ValidationError("Survey name must be required")
-#         questions = data.get('questions')
-#         if len(questions) == 0:
-#             raise ValidationError("At least one question required")
-#         index = 1
-#         for question in questions:
-#             if question['title'] == '':
-#                 raise ValidationError("Question {}'s title must be required".format(index))
-#             if question['type'] == 'checkbox' or question['type'] == 'select' or question['type'] == 'radio':
-#                 if question['options'] == '':
-#                     raise ValidationError("Options of question {} must be required".format(index))
-#             index += 1
-#         return data
-#
-#     def create(self, validated_data):
-#         questions_data = validated_data.pop('questions')
-#         survey = Survey.objects.create(**validated_data)
-#         for question in questions_data:
-#             Question.objects.create(survey=survey, **question)
-#         return survey
-
-
 class QuestionSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+    id = serializers.IntegerField(required=False)
     title = serializers.CharField(max_length=100, required=True)
     type = serializers.CharField(required=True)
     options = serializers.CharField(required=False, allow_blank=True)
@@ -95,23 +41,24 @@ class SurveySerializer(serializers.Serializer):
 
     def update(self, survey_id, validated_data):
         questions_data = validated_data.pop('questions')
-        print(questions_data)
         survey = Survey.objects.get(id=survey_id)
+        survey.title = validated_data['title']
+        survey.save()
+        questions_list = []
         i = 1
         for question in questions_data:
-            if question['id'] == 0:
-                Question.objects.create(survey=survey, title=question['title'], type=question['type'],
-                                        options=question['options'], ordering=i)
-            else:
-                Question.objects.update_or_create(
-                    id=question['id'],
-                    defaults={
-                        'survey': survey,
-                        'title': question['title'],
-                        'type': question['type'],
-                        'options': question['options'],
-                        'ordering': i
-                    }
-                )
+            obj, created = Question.objects.update_or_create(
+                id=question.get('id'),
+                defaults={
+                    'survey': survey,
+                    'title': question['title'],
+                    'type': question['type'],
+                    'options': question['options'],
+                    'ordering': i
+                }
+            )
+            questions_list.append(obj.id)
             i += 1
+        questions = Question.objects.filter(survey_id=survey_id).exclude(id__in=questions_list)
+        questions.delete()
         return survey

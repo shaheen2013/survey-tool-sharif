@@ -1,6 +1,7 @@
 from django.db import models
 import json
 
+
 class QuestionType(models.Model):
     choice = (
         ('checkbox', 'Multi choice'),
@@ -16,8 +17,8 @@ class QuestionType(models.Model):
         ('select', "Dropdown"),
         ('textarea', "Text")
     )
-    title = models.CharField(max_length=50,null=True,blank=True)
-    type = models.CharField(choices=choice,max_length=10,null=True,blank=True)
+    title = models.CharField(max_length=50, null=True, blank=True)
+    type = models.CharField(choices=choice, max_length=10, null=True, blank=True)
     options = models.TextField(null=True, blank=True)
 
     def __str__(self):
@@ -25,19 +26,19 @@ class QuestionType(models.Model):
 
 
 class Survey(models.Model):
-    title = models.CharField(max_length=150,blank=True,null=True)
+    title = models.CharField(max_length=150, blank=True, null=True)
 
     def __str__(self):
         return self.title or ""
 
 
 class Question(models.Model):
-    survey = models.ForeignKey(Survey,on_delete=models.CASCADE)
-    title = models.CharField(max_length=150,blank=True,null=True)
-    type = models.CharField(max_length=100,blank=True,null=True)
-    options = models.CharField(max_length=100,blank=True,null=True)
+    survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
+    title = models.CharField(max_length=150, blank=True, null=True)
+    type = models.CharField(max_length=100, blank=True, null=True)
+    options = models.CharField(max_length=100, blank=True, null=True)
     choices = models.JSONField(null=True, blank=True)
-    ordering = models.PositiveIntegerField(null=True,blank=True)
+    ordering = models.PositiveIntegerField(null=True, blank=True)
 
     def __str__(self):
         return self.title or ""
@@ -50,3 +51,11 @@ class Question(models.Model):
             choice_dict[key] = choice
         self.choices = json.loads(json.dumps(choice_dict))
         super(Question, self).save(*args, **kwargs)
+
+
+class SurveyReport(models.Model):
+    survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
+    survey_report = models.JSONField()
+
+    def __str__(self):
+        return "Survey report {}".format(self.survey.title) or ""

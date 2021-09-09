@@ -4,9 +4,13 @@ from django.views import generic
 from rest_framework.views import APIView
 from rest_framework import generics, status
 from rest_framework.generics import GenericAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from .models import QuestionType, Survey, Question
+from .models import QuestionType, Survey, Question, SurveyReport
 from rest_framework.response import Response
 import json
+from .forms import QuestionForm
+
+# for multiple form
+from django.forms import formset_factory
 
 
 class HomeView(generic.View):
@@ -37,14 +41,43 @@ class SurveyView(GenericAPIView):
         if serializer.is_valid():
             serializer.update(survey_id, serializer.data)
             return Response(
-                {"info": "update", "message": "{} survey form has been updated successfully".format(request.data['title'])})
+                {"info": "update",
+                 "message": "{} survey form has been updated successfully".format(request.data['title'])})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def SurveyPreview(request, id):
-    questions = Question.objects.filter(survey_id=id).order_by('ordering')
-    survey = Survey.objects.get(id=id)
-    return render(request, 'preview.html', {"questions": questions, "survey": survey})
+class SurveyPreview(generic.View):
+    # def get(self, request, id):
+    #     form = QuestionForm()
+    #     questions = Question.objects.filter(survey_id=id).order_by('ordering')
+    #     survey = Survey.objects.get(id=id)
+    #     return render(request, 'preview.html', {"questions": questions, "survey": survey})
+
+    def get(self, request, id):
+        questions = list(Question.objects.filter(survey_id=id).order_by('ordering').values('id','title','type','choices'))
+        QuestionFormSet = formset_factory(QuestionForm)
+        formset = QuestionFormSet(initial=questions)
+        survey = Survey.objects.get(id=id)
+        return render(request, 'preview.html', {"questions": questions, "survey": survey, "formset": formset})
+
+    def post(self, request, id):
+        queryDict = dict(request.POST)
+        queryDict.pop('csrfmiddlewaretoken')
+        questions = list(
+            Question.objects.filter(survey_id=id).order_by('ordering').values('id', 'title', 'type', 'options'))
+        answers = []
+        for question, (key, value) in zip(questions, queryDict.items()):
+            data = {}
+            data['id'] = question['id']
+            data['question'] = question['title']
+            data['type'] = question['type']
+            data['options'] = question['options']
+            data['answer'] = value
+            answers.append(data)
+
+        report = SurveyReport(survey_id=id, survey_report=answers)
+        report.save()
+        return redirect('/survey-list')
 
 
 def surveyList(request):

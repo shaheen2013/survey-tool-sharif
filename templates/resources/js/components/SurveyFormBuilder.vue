@@ -27,7 +27,7 @@
               group="people"
               @change="log"
           >
-            <div class="list-group-item border-2" v-for="(element,index) in list2" :key="element.id">
+            <div class="list-group-item border-2" v-for="(element,index) in list2" :key="index">
               <div class="d-flex justify-content-between mb-2">
                 Add question No {{ index + 1 }}
                 <span @click="removeQue(index)" class="btn btn-danger">X</span>
@@ -55,18 +55,18 @@ import NotificationService from "../services/notification.service";
 
 let idGlobal = 1;
 export default {
-  name: "SurveyFormBuilder",
-  display: "Custom Clone",
-  props: ['edit', 'surveyid'],
+  name      : "SurveyFormBuilder",
+  display   : "Custom Clone",
+  props     : ['edit', 'surveyid'],
   components: {
     draggable
   },
   data() {
     return {
-      list1: [],
-      list2: [],
+      list1       : [],
+      list2       : [],
       survey_title: "",
-      survey_item:{}
+      survey_item : {}
     };
   },
   methods: {
@@ -74,35 +74,30 @@ export default {
       let url = '/survey-save/'
       if (this.edit === 0) {
         let info = {"title": this.survey_title, "questions": this.list2}
-        ApiService.post(url, info).
-        then(res => {
+        ApiService.post(url, info).then(res => {
               this.survey_title = ""
               this.list2 = []
               NotificationService.success("Survey saved successfully")
             }
-        ).
-        catch(error => {
+        ).catch(error => {
           let errors
           let error_message = []
           if (error.response.data.title) {
             error_message.push(`<p>Survey title can not be empty</p>`)
           }
-          if (error.response.data['questions'][0] === 'This list may not be empty.')
-          {
+          if (error.response.data['questions'][0] === 'This list may not be empty.') {
             error_message.push(`<p> Survey list should need minimum one question </p>`)
-          }
-          else {
+          } else {
             errors = error.response.data.questions
           }
           if (errors) {
             for (let i of Object.keys(errors)) {
-              error_message.push(`<p>Question ${parseInt(i)+1} is required</p>`)
+              error_message.push(`<p>Question ${parseInt(i) + 1} is required</p>`)
             }
           }
           NotificationService.error(error_message)
         })
-      }
-      else {
+      } else {
         let info = {"title": this.survey_title, "questions": this.list2, "survey_id": this.surveyid}
         ApiService.update(url, info).then(
             res => {
@@ -123,9 +118,8 @@ export default {
     },
     cloneDog({id}) {
       return {
-        id:0,
-        type: `${this.list1[id - 1].type}`,
-        title: "",
+        type   : `${this.list1[id - 1].type}`,
+        title  : "",
         options: ""
       };
     },
@@ -135,11 +129,11 @@ export default {
   },
   mounted() {
     let url = '/question-type'
-      ApiService.get(url)
-          .then(res => {
-                this.list1 = res.data
-              }
-          ).catch(err => console.log(err))
+    ApiService.get(url)
+        .then(res => {
+              this.list1 = res.data
+            }
+        ).catch(err => console.log(err))
     if (this.edit === 1) {
       let url = '/update-survey/' + this.surveyid
       ApiService.get(url)
