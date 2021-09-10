@@ -1,16 +1,14 @@
 from django.shortcuts import render, HttpResponse, redirect
 from .serializers import QuestionTypeSerializer, SurveySerializer, QuestionSerializer
 from django.views import generic
+from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework import generics, status
-from rest_framework.generics import GenericAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import GenericAPIView
 from .models import QuestionType, Survey, Question, SurveyReport
 from rest_framework.response import Response
 import json
-from .forms import QuestionForm
-
-# for multiple form
-from django.forms import formset_factory
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 
 class HomeView(generic.View):
@@ -25,8 +23,16 @@ class QuestionTypeView(APIView):
         return Response(serializer.data)
 
 
-class SurveyView(GenericAPIView):
+class SurveyView(APIView):
+    def get(self, request, id):
+        questions = Question.objects.filter(survey_id=id).values("id", "title", "type", "options").order_by('ordering')
+        questions = list(questions)
+        survey = list(Survey.objects.filter(id=id).values("id", "title"))
+        final_list = questions + survey
+        return Response(json.loads(json.dumps(final_list)))
 
+
+class SurveySaveUpdateView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = SurveySerializer(data=request.data)
         if serializer.is_valid():
@@ -46,38 +52,58 @@ class SurveyView(GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class SurveyPreview(generic.View):
-    # def get(self, request, id):
-    #     form = QuestionForm()
-    #     questions = Question.objects.filter(survey_id=id).order_by('ordering')
-    #     survey = Survey.objects.get(id=id)
-    #     return render(request, 'preview.html', {"questions": questions, "survey": survey})
+# class SurveyPreview(generic.View):
+#
+#     def get(self, request, id):
+#         questions = Question.objects.filter(survey_id=id).order_by('ordering')
+#         survey = Survey.objects.get(id=id)
+#         return render(request, 'preview.html', {"questions": questions, "survey": survey})
+#
+#     def post(self, request, id):
+#         # print("files ", request.FILES)
+#         queryDict = dict(request.POST)
+#         queryDict.pop('csrfmiddlewaretoken')
+#         questions = list(
+#             Question.objects.filter(survey_id=id).order_by('ordering').values('id', 'title', 'type', 'options'))
+#         # print("others ", queryDict)
+#         answers = []
+#         # if len(questions) != len(queryDict.keys()):
+#         #     return HttpResponse("All answer required")
+#         i = 1
+#         for question in questions:
+#             data = {}
+#             data['id'] = question['id']
+#             data['question'] = question['title']
+#             data['type'] = question['type']
+#             data['options'] = question['options']
+#             if question['type'] == 'file':
+#                 data['answer'] = request.FILES.get(str(i)).name
+#                 file = request.FILES.get(str(i))
+#                 default_storage.save('media/' + request.FILES.get(str(i)).name, ContentFile(file.read()))
+#             else:
+#                 data['answer'] = queryDict.get(str(i))
+#             i += 1
+#             answers.append(data)
+#         # print(answers)
+#         report = SurveyReport(survey_id=id, survey_report=answers)
+#         report.save()
+#         return redirect('/survey-list')
 
+
+class SurveyPreviewQuestion(APIView):
     def get(self, request, id):
-        questions = list(Question.objects.filter(survey_id=id).order_by('ordering').values('id','title','type','choices'))
-        QuestionFormSet = formset_factory(QuestionForm)
-        formset = QuestionFormSet(initial=questions)
+        questions = Question.objects.filter(survey_id=id).values("id", "title", "type", "choices").order_by('ordering')
+        return Response(questions)
+
+class SurveyPreviewShow(generic.View):
+    def get(self, request, id):
         survey = Survey.objects.get(id=id)
-        return render(request, 'preview.html', {"questions": questions, "survey": survey, "formset": formset})
+        return render(request, 'preview.html', {"id": id, "survey_title": survey.title})
 
+
+class SurveyPreviewSave(APIView):
     def post(self, request, id):
-        queryDict = dict(request.POST)
-        queryDict.pop('csrfmiddlewaretoken')
-        questions = list(
-            Question.objects.filter(survey_id=id).order_by('ordering').values('id', 'title', 'type', 'options'))
-        answers = []
-        for question, (key, value) in zip(questions, queryDict.items()):
-            data = {}
-            data['id'] = question['id']
-            data['question'] = question['title']
-            data['type'] = question['type']
-            data['options'] = question['options']
-            data['answer'] = value
-            answers.append(data)
-
-        report = SurveyReport(survey_id=id, survey_report=answers)
-        report.save()
-        return redirect('/survey-list')
+        print("Post")
 
 
 def surveyList(request):
@@ -88,15 +114,3 @@ def surveyList(request):
 class UpdatePage(generic.View):
     def get(self, request, id):
         return render(request, 'edit-survey.html', {"id": id})
-
-
-class SurveyUpdateView(generic.View):
-    def get(self, request, id):
-        questions = Question.objects.filter(survey_id=id).values("id", "title", "type", "options").order_by('ordering')
-        questions = list(questions)
-        survey = list(Survey.objects.filter(id=id).values("id", "title"))
-        final_list = questions + survey
-        return HttpResponse(json.dumps(final_list))
-
-    def post(self, request):
-        print("post value")

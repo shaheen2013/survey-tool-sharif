@@ -1985,7 +1985,7 @@ var idGlobal = 1;
     submit_btn: function submit_btn() {
       var _this = this;
 
-      var url = '/survey-save/';
+      var url = '/survey/';
 
       if (this.edit === 0) {
         var info = {
@@ -2060,15 +2060,102 @@ var idGlobal = 1;
     });
 
     if (this.edit === 1) {
-      var _url = '/update-survey/' + this.surveyid;
+      var _url = '/survey/' + this.surveyid;
 
       _services_api_service__WEBPACK_IMPORTED_MODULE_1__["default"].get(_url).then(function (res) {
+        console.log(res.data);
         _this2.list2 = res.data;
         _this2.survey_item = _this2.list2.pop();
         _this2.survey_title = _this2.survey_item['title'];
       })["catch"](function (err) {
         return console.log("error", err);
       });
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./templates/resources/js/components/SurveyPreview.vue?vue&type=script&lang=js&":
+/*!**********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./templates/resources/js/components/SurveyPreview.vue?vue&type=script&lang=js& ***!
+  \**********************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _services_api_service__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../services/api.service */ "./templates/resources/js/services/api.service.js");
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: ['surveyid', 'survey_title'],
+  name: "SurveyPreview",
+  data: function data() {
+    return {
+      questions: []
+    };
+  },
+  mounted: function mounted() {
+    var _this = this;
+
+    var url = '/preview-questions/' + this.surveyid;
+    _services_api_service__WEBPACK_IMPORTED_MODULE_0__["default"].get(url).then(function (res) {
+      console.log(res.data);
+      _this.questions = res.data;
+    });
+  },
+  methods: {
+    submit_btn: function submit_btn() {
+      console.log("Printed");
     }
   }
 });
@@ -9574,6 +9661,136 @@ var render = function() {
             _vm._m(0)
           ],
           1
+        )
+      ])
+    ])
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "mt-3" }, [
+      _c(
+        "button",
+        { staticClass: "btn btn-primary", attrs: { type: "submit" } },
+        [_vm._v(" Save")]
+      )
+    ])
+  }
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./templates/resources/js/components/SurveyPreview.vue?vue&type=template&id=692e17dd&":
+/*!**************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./templates/resources/js/components/SurveyPreview.vue?vue&type=template&id=692e17dd& ***!
+  \**************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "container mt-5" }, [
+    _c("div", { staticClass: "col-10 bg-light" }, [
+      _c("h6", [_vm._v("Survey name: " + _vm._s(_vm.survey_title))]),
+      _vm._v(" "),
+      _c("h3", [_vm._v("Questions")]),
+      _vm._v(" "),
+      _c("div", [
+        _c(
+          "form",
+          {
+            attrs: { method: "POST" },
+            on: {
+              submit: function($event) {
+                $event.preventDefault()
+                return _vm.submit_btn.apply(null, arguments)
+              }
+            }
+          },
+          [
+            _vm._l(_vm.questions, function(element, index) {
+              return _c(
+                "div",
+                { key: index, staticClass: "list-group-item border-2" },
+                [
+                  _c("label", [_vm._v(_vm._s(element.title))]),
+                  _vm._v(" "),
+                  element.type === "checkbox"
+                    ? _c(
+                        "div",
+                        _vm._l(element.choices, function(choice) {
+                          return _c("div", [
+                            _c("input", {
+                              attrs: { type: "checkbox", value: "choice" }
+                            }),
+                            _vm._v(" "),
+                            _c("label", [_vm._v(" " + _vm._s(choice) + " ")]),
+                            _c("br")
+                          ])
+                        }),
+                        0
+                      )
+                    : _vm._e(),
+                  _vm._v(" "),
+                  element.type === "radio"
+                    ? _c(
+                        "div",
+                        _vm._l(element.choices, function(choice) {
+                          return _c("div", [
+                            _c("input", {
+                              attrs: { type: "radio", value: "choice" }
+                            }),
+                            _vm._v(" "),
+                            _c("label", [_vm._v(" " + _vm._s(choice) + " ")]),
+                            _c("br")
+                          ])
+                        }),
+                        0
+                      )
+                    : _vm._e(),
+                  _vm._v(" "),
+                  element.type === "select"
+                    ? _c("div", [
+                        _c(
+                          "select",
+                          _vm._l(element.choices, function(choice) {
+                            return _c("option", [_vm._v(_vm._s(choice))])
+                          }),
+                          0
+                        )
+                      ])
+                    : element.type === "file"
+                    ? _c("div", [_c("input", { attrs: { type: "file" } })])
+                    : element.type === "date"
+                    ? _c("div", [_c("input", { attrs: { type: "date" } })])
+                    : element.type === "textarea"
+                    ? _c("div", [
+                        _c("textarea", { staticClass: "form-control" })
+                      ])
+                    : element.type === "text"
+                    ? _c("div", [
+                        _c("input", { attrs: { type: "text", s: "" } })
+                      ])
+                    : _vm._e()
+                ]
+              )
+            }),
+            _vm._v(" "),
+            _vm._m(0)
+          ],
+          2
         )
       ])
     ])
@@ -24311,6 +24528,75 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./templates/resources/js/components/SurveyPreview.vue":
+/*!*************************************************************!*\
+  !*** ./templates/resources/js/components/SurveyPreview.vue ***!
+  \*************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _SurveyPreview_vue_vue_type_template_id_692e17dd___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./SurveyPreview.vue?vue&type=template&id=692e17dd& */ "./templates/resources/js/components/SurveyPreview.vue?vue&type=template&id=692e17dd&");
+/* harmony import */ var _SurveyPreview_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./SurveyPreview.vue?vue&type=script&lang=js& */ "./templates/resources/js/components/SurveyPreview.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _SurveyPreview_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _SurveyPreview_vue_vue_type_template_id_692e17dd___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _SurveyPreview_vue_vue_type_template_id_692e17dd___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "templates/resources/js/components/SurveyPreview.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./templates/resources/js/components/SurveyPreview.vue?vue&type=script&lang=js&":
+/*!**************************************************************************************!*\
+  !*** ./templates/resources/js/components/SurveyPreview.vue?vue&type=script&lang=js& ***!
+  \**************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_SurveyPreview_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib??ref--4-0!../../../../node_modules/vue-loader/lib??vue-loader-options!./SurveyPreview.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./templates/resources/js/components/SurveyPreview.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_SurveyPreview_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./templates/resources/js/components/SurveyPreview.vue?vue&type=template&id=692e17dd&":
+/*!********************************************************************************************!*\
+  !*** ./templates/resources/js/components/SurveyPreview.vue?vue&type=template&id=692e17dd& ***!
+  \********************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_SurveyPreview_vue_vue_type_template_id_692e17dd___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib??vue-loader-options!./SurveyPreview.vue?vue&type=template&id=692e17dd& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./templates/resources/js/components/SurveyPreview.vue?vue&type=template&id=692e17dd&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_SurveyPreview_vue_vue_type_template_id_692e17dd___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_SurveyPreview_vue_vue_type_template_id_692e17dd___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
 /***/ "./templates/resources/js/main.js":
 /*!****************************************!*\
   !*** ./templates/resources/js/main.js ***!
@@ -24327,6 +24613,7 @@ var Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js"
 
 
 Vue.component('survey-builder', __webpack_require__(/*! ./components/SurveyFormBuilder.vue */ "./templates/resources/js/components/SurveyFormBuilder.vue")["default"]);
+Vue.component('survey-preview', __webpack_require__(/*! ./components/SurveyPreview.vue */ "./templates/resources/js/components/SurveyPreview.vue")["default"]);
 
 
 window.Swal = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2/dist/sweetalert2.all.js"); //Toast

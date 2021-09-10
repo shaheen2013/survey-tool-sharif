@@ -71,7 +71,7 @@ export default {
   },
   methods: {
     submit_btn() {
-      let url = '/survey-save/'
+      let url = '/survey/'
       if (this.edit === 0) {
         let info = {"title": this.survey_title, "questions": this.list2}
         ApiService.post(url, info).then(res => {
@@ -135,10 +135,11 @@ export default {
             }
         ).catch(err => console.log(err))
     if (this.edit === 1) {
-      let url = '/update-survey/' + this.surveyid
+      let url = '/survey/' + this.surveyid
       ApiService.get(url)
           .then(
               res => {
+                console.log(res.data)
                 this.list2 = res.data
                 this.survey_item = this.list2.pop()
                 this.survey_title = this.survey_item['title']

@@ -1,28 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
-    <meta charset="UTF-8">
-    <title>Preview page</title>
-</head>
-<body>
-<div class="container mt-5 bg-light col-6 ">
-    <div class="d-flex justify-content-between">
-        <h6 class="display-6">Survey: {{ survey.title|title }}</h6>
-        <a href="/update/{{survey.id}}" class="btn btn-secondary">Edit</a>
+{% extends 'app/layout.html' %}
+
+{% block title %} Edit survey {% endblock %}
+
+{% block content %}
+    <div id="app">
+        <survey-preview surveyid="{{id}}" survey_title="{{survey_title}}"></survey-preview>
     </div>
-    <form action="/preview/{{survey.id}}" method="POST">
-        {% csrf_token %}
-                {{ formset.management_form }}
-                {% for p in formset %}
-                    {{ p.title }}
-                {% endfor %}
+{% endblock %}
+
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"-->
+<!--          integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>Preview page</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container mt-5 bg-light col-6 ">-->
+<!--    <div class="d-flex justify-content-between">-->
+<!--        <h6 class="display-6">Survey: {{ survey.title|title }}</h6>-->
+<!--        <a href="/update/{{survey.id}}" class="btn btn-secondary">Edit</a>-->
+<!--    </div>-->
+<!--    <form action="/preview/{{survey.id}}" method="POST" enctype="multipart/form-data">-->
+<!--        {% csrf_token %}-->
+<!--        &lt;!&ndash;                {{ formset.management_form }}&ndash;&gt;-->
+<!--        &lt;!&ndash;                {% for p in formset %}&ndash;&gt;-->
+<!--        &lt;!&ndash;                    {{ p.title }}&ndash;&gt;-->
+<!--        &lt;!&ndash;                {% endfor %}&ndash;&gt;-->
 <!--        {% for q in questions %}-->
 <!--        <div class="mb-3 col-6">-->
 <!--            <label for="exampleInputEmail1" class="form-label">{{ q.title }}</label>-->
 <!--            {% if q.type == 'select' %}-->
-<!--            <select name="{{ q.title }}" class="form-select" aria-label="Default select example">-->
+<!--&lt;!&ndash;            <input hidden name="{{q.title}}" value="{{q.title}}">&ndash;&gt;-->
+<!--            <select name="{{ forloop.counter }}" class="form-select" aria-label="Default select example">-->
 <!--                {% if q.choices %}-->
 <!--                {% for choice in q.choices %}-->
 <!--                <option value="{{ choice }}"> {{ choice }}</option>-->
@@ -30,39 +42,48 @@
 <!--                {% endif %}-->
 <!--            </select>-->
 <!--            {% elif q.type == 'textarea' %}-->
-<!--            <textarea name="{{ q.title }}" class="form-control"></textarea>-->
+<!--&lt;!&ndash;            <input hidden name="{{q.title}}" value="{{q.title}}">&ndash;&gt;-->
+<!--            <textarea name="{{ forloop.counter }}" class="form-control"></textarea>-->
 <!--            {% elif q.type == 'radio' %}-->
+<!--&lt;!&ndash;            <input hidden name="{{q.title}}" value="{{q.title}}">&ndash;&gt;-->
 <!--            {% if q.choices %}-->
-<!--            {% for choice in q.choices %}-->
-<!--            <div class="form-check">-->
-<!--                <input class="form-check-input" type="radio" name="{{ q.title }}" value="{{ choice }}"-->
-<!--                       id="flexRadioDefault{{ forloop.counter }}">-->
-<!--                <label class="form-check-label" for="flexRadioDefault{{ forloop.counter }}">-->
-<!--                    {{ choice }}-->
-<!--                </label>-->
-<!--            </div>-->
-<!--            {% endfor %}-->
+<!--                {% for choice in q.choices %}-->
+<!--                <div class="form-check">-->
+<!--                    <input class="form-check-input" type="radio" name="{{ forloop.counter }}" value="{{ choice }}"-->
+<!--                           id="flexRadioDefault{{ forloop.counter }}">-->
+<!--                    <label class="form-check-label" for="flexRadioDefault{{ forloop.counter }}">-->
+<!--                        {{ choice }}-->
+<!--                    </label>-->
+<!--                </div>-->
+<!--                {% endfor %}-->
 <!--            {% endif %}-->
 <!--            {% elif q.type == 'checkbox' %}-->
-<!--            {% if q.choices %}-->
-<!--            {% for choice in q.choices %}-->
-<!--            <div class="form-check">-->
-<!--                <input class="form-check-input" type="checkbox" name="{{ q.title }}" value="{{ choice }}"-->
-<!--                       id="flexRadioDefault1">-->
-<!--                <label class="form-check-label" for="flexRadioDefault1">-->
-<!--                    {{ choice }}-->
-<!--                </label>-->
-<!--            </div>-->
-<!--            {% endfor %}-->
-<!--            {% endif %}-->
-<!--            {% else %}-->
-<!--            <input name="{{ q.title }}" type="{{ q.type }}" accept="image/*" class="form-control"-->
+<!--&lt;!&ndash;            <input hidden name="{{q.title}}" value="{{q.title}}">&ndash;&gt;-->
+<!--                {% if q.choices %}-->
+<!--                    {% for choice in q.choices %}-->
+<!--                        <div class="form-check">-->
+<!--                            <input class="form-check-input" type="checkbox" name="{{ forloop.counter }}" value="{{ choice }}"-->
+<!--                                   id="flexRadioDefault1">-->
+<!--                            <label class="form-check-label" for="flexRadioDefault1">-->
+<!--                                {{ choice }}-->
+<!--                            </label>-->
+<!--                        </div>-->
+<!--                    {% endfor %}-->
+<!--                {% endif %}-->
+<!--            {% elif q.type == 'file' %}-->
+<!--&lt;!&ndash;            <input hidden name="{{q.title}}" value="{{q.title}}">&ndash;&gt;-->
+<!--            <input name="{{ forloop.counter }}" type="file" accept="image/*" class="form-control"-->
 <!--                   id="exampleInputEmail1" aria-describedby="emailHelp">-->
+<!--            {% else %}-->
+<!--&lt;!&ndash;            <input hidden name="{{q.title}}" value="{{q.title}}">&ndash;&gt;-->
+<!--            <input name="{{ forloop.counter }}" type="{{ q.type }}" class="form-control">-->
 <!--            {% endif %}-->
 <!--        </div>-->
 <!--        {% endfor %}-->
-        <button type="submit" class="btn btn-primary"> Submit</button>
-    </form>
-</div>
-</body>
-</html>
+<!--        <button type="submit" class="btn btn-primary"> Submit</button>-->
+<!--    </form>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
+

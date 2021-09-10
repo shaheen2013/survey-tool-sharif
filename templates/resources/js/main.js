@@ -2,6 +2,7 @@ const Vue = require("vue");
 
 // Vue.component('hello-world', require('./components/HelloWorld.vue'))
 Vue.component('survey-builder', require('./components/SurveyFormBuilder.vue').default)
+Vue.component('survey-preview', require('./components/SurveyPreview.vue').default)
 import ApiService from './services/api.service'
 
 import Swal from 'sweetalert2'
