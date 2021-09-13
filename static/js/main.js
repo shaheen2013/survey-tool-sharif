@@ -2141,7 +2141,8 @@ __webpack_require__.r(__webpack_exports__);
   name: "SurveyPreview",
   data: function data() {
     return {
-      questions: []
+      questions: [],
+      answers: []
     };
   },
   mounted: function mounted() {
@@ -2149,13 +2150,21 @@ __webpack_require__.r(__webpack_exports__);
 
     var url = '/preview-questions/' + this.surveyid;
     _services_api_service__WEBPACK_IMPORTED_MODULE_0__["default"].get(url).then(function (res) {
-      console.log(res.data);
       _this.questions = res.data;
     });
   },
   methods: {
     submit_btn: function submit_btn() {
-      console.log("Printed");
+      var url = '/preview-submit/' + this.surveyid;
+      _services_api_service__WEBPACK_IMPORTED_MODULE_0__["default"].post(url, this.answers).then(function (res) {
+        return console.log(res.data);
+      })["catch"](function (err) {
+        return console.log(err);
+      });
+    },
+    fileHandler: function fileHandler(index) {
+      console.log(index);
+      console.log(this.$refs["ref" + index]);
     }
   }
 });
@@ -9727,31 +9736,114 @@ var render = function() {
                 [
                   _c("label", [_vm._v(_vm._s(element.title))]),
                   _vm._v(" "),
-                  element.type === "checkbox"
-                    ? _c(
-                        "div",
-                        _vm._l(element.choices, function(choice) {
-                          return _c("div", [
-                            _c("input", {
-                              attrs: { type: "checkbox", value: "choice" }
-                            }),
-                            _vm._v(" "),
-                            _c("label", [_vm._v(" " + _vm._s(choice) + " ")]),
-                            _c("br")
-                          ])
-                        }),
-                        0
-                      )
-                    : _vm._e(),
-                  _vm._v(" "),
                   element.type === "radio"
                     ? _c(
                         "div",
                         _vm._l(element.choices, function(choice) {
                           return _c("div", [
-                            _c("input", {
-                              attrs: { type: "radio", value: "choice" }
-                            }),
+                            element.type === "checkbox"
+                              ? _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: _vm.answers[index],
+                                      expression: "answers[index]"
+                                    }
+                                  ],
+                                  key: choice,
+                                  attrs: { type: "checkbox" },
+                                  domProps: {
+                                    value: choice,
+                                    checked: Array.isArray(_vm.answers[index])
+                                      ? _vm._i(_vm.answers[index], choice) > -1
+                                      : _vm.answers[index]
+                                  },
+                                  on: {
+                                    change: function($event) {
+                                      var $$a = _vm.answers[index],
+                                        $$el = $event.target,
+                                        $$c = $$el.checked ? true : false
+                                      if (Array.isArray($$a)) {
+                                        var $$v = choice,
+                                          $$i = _vm._i($$a, $$v)
+                                        if ($$el.checked) {
+                                          $$i < 0 &&
+                                            _vm.$set(
+                                              _vm.answers,
+                                              index,
+                                              $$a.concat([$$v])
+                                            )
+                                        } else {
+                                          $$i > -1 &&
+                                            _vm.$set(
+                                              _vm.answers,
+                                              index,
+                                              $$a
+                                                .slice(0, $$i)
+                                                .concat($$a.slice($$i + 1))
+                                            )
+                                        }
+                                      } else {
+                                        _vm.$set(_vm.answers, index, $$c)
+                                      }
+                                    }
+                                  }
+                                })
+                              : element.type === "radio"
+                              ? _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: _vm.answers[index],
+                                      expression: "answers[index]"
+                                    }
+                                  ],
+                                  key: choice,
+                                  attrs: { type: "radio" },
+                                  domProps: {
+                                    value: choice,
+                                    checked: _vm._q(_vm.answers[index], choice)
+                                  },
+                                  on: {
+                                    change: function($event) {
+                                      return _vm.$set(
+                                        _vm.answers,
+                                        index,
+                                        choice
+                                      )
+                                    }
+                                  }
+                                })
+                              : _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: _vm.answers[index],
+                                      expression: "answers[index]"
+                                    }
+                                  ],
+                                  key: choice,
+                                  attrs: { type: element.type },
+                                  domProps: {
+                                    value: choice,
+                                    value: _vm.answers[index]
+                                  },
+                                  on: {
+                                    input: function($event) {
+                                      if ($event.target.composing) {
+                                        return
+                                      }
+                                      _vm.$set(
+                                        _vm.answers,
+                                        index,
+                                        $event.target.value
+                                      )
+                                    }
+                                  }
+                                }),
                             _vm._v(" "),
                             _c("label", [_vm._v(" " + _vm._s(choice) + " ")]),
                             _c("br")
@@ -9765,6 +9857,35 @@ var render = function() {
                     ? _c("div", [
                         _c(
                           "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.answers[index],
+                                expression: "answers[index]"
+                              }
+                            ],
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.answers,
+                                  index,
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
                           _vm._l(element.choices, function(choice) {
                             return _c("option", [_vm._v(_vm._s(choice))])
                           }),
@@ -9772,16 +9893,65 @@ var render = function() {
                         )
                       ])
                     : element.type === "file"
-                    ? _c("div", [_c("input", { attrs: { type: "file" } })])
+                    ? _c("div", [
+                        _c("input", {
+                          ref: "ref" + index,
+                          refInFor: true,
+                          attrs: { type: "file" },
+                          on: {
+                            change: function($event) {
+                              return _vm.fileHandler(index)
+                            }
+                          }
+                        })
+                      ])
                     : element.type === "date"
                     ? _c("div", [_c("input", { attrs: { type: "date" } })])
                     : element.type === "textarea"
                     ? _c("div", [
-                        _c("textarea", { staticClass: "form-control" })
+                        _c("textarea", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.answers[index],
+                              expression: "answers[index]"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          domProps: { value: _vm.answers[index] },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(_vm.answers, index, $event.target.value)
+                            }
+                          }
+                        })
                       ])
                     : element.type === "text"
                     ? _c("div", [
-                        _c("input", { attrs: { type: "text", s: "" } })
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.answers[index],
+                              expression: "answers[index]"
+                            }
+                          ],
+                          attrs: { type: "text" },
+                          domProps: { value: _vm.answers[index] },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(_vm.answers, index, $event.target.value)
+                            }
+                          }
+                        })
                       ])
                     : _vm._e()
                 ]

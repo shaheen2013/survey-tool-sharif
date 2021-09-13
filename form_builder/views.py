@@ -95,6 +95,7 @@ class SurveyPreviewQuestion(APIView):
         questions = Question.objects.filter(survey_id=id).values("id", "title", "type", "choices").order_by('ordering')
         return Response(questions)
 
+
 class SurveyPreviewShow(generic.View):
     def get(self, request, id):
         survey = Survey.objects.get(id=id)
@@ -103,7 +104,7 @@ class SurveyPreviewShow(generic.View):
 
 class SurveyPreviewSave(APIView):
     def post(self, request, id):
-        print("Post")
+        print("Post ",request.data)
 
 
 def surveyList(request):

@@ -10,8 +10,9 @@
     <h1>Survey list</h1>
      {% for s in surveys %}
          <div class="card m-5 col-4 bg-light">
-            <div class="card-body">
+            <div class="card-body d-flex justify-content-between">
                 <a href="/preview/{{ s.id }}" style="text-decoration: none"> {{ s.title }} </a>
+                <a href="/update/{{s.id}}" class="btn btn-info">Edit</a>
             </div>
          </div>
       {% endfor %}
